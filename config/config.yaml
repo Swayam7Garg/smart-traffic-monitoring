@@ -1,0 +1,96 @@
+
+# System Configuration for Smart Traffic Light Monitoring
+
+# Detection Settings
+detection:
+  model: "yolov8n.pt"  # Options: yolov8n.pt (nano), yolov8s.pt (small), yolov8m.pt (medium)
+  confidence_threshold: 0.5
+  iou_threshold: 0.45
+  device: "cpu"  # Options: "cpu", "cuda", "mps"
+  
+  # Vehicle classes to detect (COCO dataset)
+  vehicle_classes:
+    - 2   # car
+    - 3   # motorcycle  
+    - 5   # bus
+    - 7   # truck
+  
+  emergency_classes:
+    - 5   # bus (ambulance)
+    - 7   # truck (fire truck)
+
+# Lane Configuration
+lanes:
+  count: 4  # Number of lanes to monitor
+  positions:
+    # Define ROI (Region of Interest) for each lane
+    # Format: [x1, y1, x2, y2] as percentage of frame
+    lane_1: [0, 0, 50, 50]      # Top-left quadrant
+    lane_2: [50, 0, 100, 50]    # Top-right quadrant
+    lane_3: [0, 50, 50, 100]    # Bottom-left quadrant
+    lane_4: [50, 50, 100, 100]  # Bottom-right quadrant
+
+# Signal Control Settings
+signal:
+  # Base timing (in seconds)
+  min_green_time: 10
+  max_green_time: 60
+  yellow_time: 3
+  all_red_time: 2
+  
+  # Adaptive timing parameters
+  adaptive_mode: true
+  density_thresholds:
+    low: 5      # vehicles
+    medium: 15  # vehicles
+    high: 30    # vehicles
+  
+  # Time allocation based on density
+  time_multipliers:
+    low: 1.0
+    medium: 1.5
+    high: 2.0
+  
+  # Emergency vehicle priority
+  emergency_priority: true
+  emergency_green_time: 30
+
+# Video Input Settings
+video:
+  source: "data/input_videos/traffic_video_modified.mp4"  # 0 for webcam, or path to video file, or RTSP URL
+  frame_width: 1280
+  frame_height: 720
+  fps: 30
+  
+  # Processing
+  skip_frames: 1  # Process every Nth frame (1 = process all)
+  resize_factor: 1.0  # Scale input frames
+
+# Output Settings
+output:
+  save_video: true
+  output_dir: "data/output"
+  video_codec: "mp4v"
+  
+  # Visualization
+  show_live_feed: true
+  show_detections: true
+  show_statistics: true
+  show_heatmap: false
+  
+  # Logging
+  log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  log_file: "data/output/traffic_log.txt"
+  save_statistics: true
+
+# Performance Settings
+performance:
+  use_gpu: false
+  batch_size: 1
+  num_workers: 2
+  
+# Alert Settings
+alerts:
+  enable_alerts: true
+  congestion_threshold: 25  # vehicles per lane
+  alert_email: null  # email@example.com or null

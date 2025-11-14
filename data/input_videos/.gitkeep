@@ -1,0 +1,20 @@
+# Input Videos Folder
+
+Place your traffic video files here.
+
+## Supported Formats
+- MP4
+- AVI
+- MOV
+- MKV
+
+## Example Video Sources
+- https://www.pexels.com/search/videos/indian%20traffic/
+- https://pixabay.com/videos/search/traffic/
+
+## Update Config
+After adding video, update `config/config.yaml`:
+```yaml
+video:
+  source: "data/input_videos/your_video.mp4"
+```

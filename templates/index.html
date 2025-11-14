@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Traffic Monitoring System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --accent: #ec4899;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #0f172a;
+            --dark-light: #1e293b;
+            --gray: #64748b;
+            --light: #f1f5f9;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--dark);
+            color: var(--light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 90%, rgba(236, 72, 153, 0.1) 0%, transparent 50%);
+            animation: bgFloat 20s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes bgFloat {
+            0%, 100% { transform: translate(0, 0); }
+            33% { transform: translate(30px, -30px); }
+            66% { transform: translate(-30px, 30px); }
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header with Glassmorphism */
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .header-content {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            font-size: 1.125rem;
+            color: var(--gray);
+            font-weight: 400;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            letter-spacing: 0.025em;
+            transition: all 0.3s ease;
+        }
+
+        .status::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: statusPulse 2s ease-in-out infinite;
+        }
+
+        .status.running {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--success);
+        }
+
+        .status.running::before {
+            background: var(--success);
+            box-shadow: 0 0 10px var(--success);
+        }
+
+        .status.stopped {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--danger);
+        }
+
+        .status.stopped::before {
+            background: var(--danger);
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.1); }
+        }
+
+        /* Dashboard Grid */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1.6fr 1fr;
+            gap: 1.5rem;
+        }
+
+        /* Card Styles with Glassmorphism */
+        .card {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 1.75rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.4);
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--light);
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+        }
+
+        .card-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(to bottom, var(--primary), var(--secondary));
+            border-radius: 2px;
+        }
+
+        /* Video Container */
+        .video-container {
+            position: relative;
+            overflow: hidden;
+        }
+
+        #video-feed {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+        #video-feed:hover {
+            transform: scale(1.01);
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            justify-content: center;
+        }
+
+        button {
+            padding: 0.875rem 2rem;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
+        }
+
+        .btn-stop {
+            background: linear-gradient(135deg, var(--danger), #dc2626);
+            color: white;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-stop:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.6);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* Stats Panel */
+        .stats-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15));
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 1.75rem;
+            border-radius: 16px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+            animation: statRotate 15s linear infinite;
+        }
+
+        @keyframes statRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.2);
+        }
+
+        .stat-card.warning {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(239, 68, 68, 0.15));
+            border-color: rgba(245, 158, 11, 0.2);
+        }
+
+        .stat-card.warning:hover {
+            border-color: rgba(245, 158, 11, 0.4);
+            box-shadow: 0 10px 40px rgba(245, 158, 11, 0.2);
+        }
+
+        .stat-value {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0.75rem 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-card.warning .stat-value {
+            background: linear-gradient(135deg, var(--warning), var(--danger));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Lane Info */
+        .lane-info {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 1.25rem;
+            border-radius: 12px;
+            margin-top: 1rem;
+        }
+
+        .lane {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.875rem 1rem;
+            margin: 0.5rem 0;
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 10px;
+            border-left: 3px solid rgba(100, 116, 139, 0.3);
+            transition: all 0.3s ease;
+            font-size: 0.9375rem;
+        }
+
+        .lane:hover {
+            background: rgba(30, 41, 59, 0.8);
+            border-left-color: var(--primary);
+            transform: translateX(4px);
+        }
+
+        .lane.active {
+            border-left-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+        }
+
+        .lane-name {
+            font-weight: 600;
+            color: var(--light);
+        }
+
+        .lane-count {
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        .lane.active .lane-count {
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        /* Emergency Alert */
+        .emergency-alert {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.2));
+            border: 2px solid var(--danger);
+            padding: 1.25rem;
+            border-radius: 12px;
+            margin-top: 1rem;
+            display: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .emergency-alert::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: alertSlide 2s ease-in-out infinite;
+        }
+
+        @keyframes alertSlide {
+            to { left: 100%; }
+        }
+
+        .emergency-alert.active {
+            display: block;
+            animation: alertPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes alertPulse {
+            0%, 100% { 
+                transform: scale(1);
+                border-color: var(--danger);
+            }
+            50% { 
+                transform: scale(1.02);
+                border-color: #fca5a5;
+            }
+        }
+
+        .emergency-alert h3 {
+            color: var(--danger);
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .emergency-alert p {
+            color: var(--light);
+            font-size: 0.9375rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2.25rem;
+            }
+
+            .stat-value {
+                font-size: 2.75rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.875rem;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+
+        /* Loading Animation */
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+
+        .loading {
+            background: linear-gradient(90deg, 
+                rgba(255, 255, 255, 0.05) 0%, 
+                rgba(255, 255, 255, 0.1) 50%, 
+                rgba(255, 255, 255, 0.05) 100%);
+            background-size: 1000px 100%;
+            animation: shimmer 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>🚦 Smart Traffic Monitoring</h1>
+                <p class="subtitle">Real-time AI-Powered Traffic Management System</p>
+                <span id="status" class="status stopped">Stopped</span>
+            </div>
+        </header>
+
+        <div class="dashboard">
+            <!-- Video Feed -->
+            <div class="card video-container">
+                <h2 class="card-title">📹 Live Camera Feed</h2>
+                <img id="video-feed" src="/video_feed" alt="Video Feed">
+                
+                <div class="controls">
+                    <button class="btn-start" onclick="startMonitoring()">▶ Start Monitoring</button>
+                    <button class="btn-stop" onclick="stopMonitoring()">⏹ Stop</button>
+                </div>
+            </div>
+
+            <!-- Statistics Panel -->
+            <div class="stats-panel">
+                <!-- Total Vehicles -->
+                <div class="stat-card">
+                    <div class="stat-icon">🚗</div>
+                    <div class="stat-label">Total Vehicles</div>
+                    <div class="stat-value" id="total-vehicles">0</div>
+                </div>
+
+                <!-- Emergency Vehicles -->
+                <div class="stat-card warning">
+                    <div class="stat-icon">🚨</div>
+                    <div class="stat-label">Emergency Vehicles</div>
+                    <div class="stat-value" id="emergency-vehicles">0</div>
+                </div>
+
+                <!-- Active Lane -->
+                <div class="card">
+                    <h3 class="card-title">🚦 Active Signal</h3>
+                    <div class="stat-value" id="active-lane">-</div>
+                </div>
+
+                <!-- Lane Information -->
+                <div class="card">
+                    <h3 class="card-title">📊 Lane Status</h3>
+                    <div class="lane-info" id="lane-info">
+                        <div class="lane">
+                            <span class="lane-name">🔼 Lane 1 (North)</span>
+                            <span class="lane-count" id="lane1-count">0 vehicles</span>
+                        </div>
+                        <div class="lane">
+                            <span class="lane-name">▶️ Lane 2 (East)</span>
+                            <span class="lane-count" id="lane2-count">0 vehicles</span>
+                        </div>
+                        <div class="lane">
+                            <span class="lane-name">🔽 Lane 3 (South)</span>
+                            <span class="lane-count" id="lane3-count">0 vehicles</span>
+                        </div>
+                        <div class="lane">
+                            <span class="lane-name">◀️ Lane 4 (West)</span>
+                            <span class="lane-count" id="lane4-count">0 vehicles</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emergency Alert -->
+                <div class="emergency-alert" id="emergency-alert">
+                    <h3>🚨 EMERGENCY VEHICLE DETECTED</h3>
+                    <p>Priority routing has been activated</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let updateInterval;
+
+        function startMonitoring() {
+            fetch('/start')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('status').className = 'status running';
+                    document.getElementById('status').textContent = '🟢 Running';
+                    
+                    // Start updating stats
+                    updateInterval = setInterval(updateStats, 1000);
+                });
+        }
+
+        function stopMonitoring() {
+            fetch('/stop')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('status').className = 'status stopped';
+                    document.getElementById('status').textContent = '⚫ Stopped';
+                    
+                    // Stop updating stats
+                    clearInterval(updateInterval);
+                });
+        }
+
+        function updateStats() {
+            fetch('/stats')
+                .then(response => response.json())
+                .then(data => {
+                    // Update total vehicles
+                    document.getElementById('total-vehicles').textContent = data.total_vehicles || 0;
+                    
+                    // Update emergency vehicles
+                    const emergencyCount = data.emergency || 0;
+                    document.getElementById('emergency-vehicles').textContent = emergencyCount;
+                    
+                    // Show/hide emergency alert
+                    const alert = document.getElementById('emergency-alert');
+                    if (emergencyCount > 0) {
+                        alert.classList.add('active');
+                    } else {
+                        alert.classList.remove('active');
+                    }
+                    
+                    // Update active lane
+                    document.getElementById('active-lane').textContent = 
+                        data.active_lane !== undefined ? `Lane ${data.active_lane + 1}` : '-';
+                    
+                    // Update lane counts
+                    if (data.lanes) {
+                        const lanes = document.querySelectorAll('.lane');
+                        data.lanes.forEach((lane, index) => {
+                            lanes[index].classList.remove('active');
+                            if (index === data.active_lane) {
+                                lanes[index].classList.add('active');
+                            }
+                            document.getElementById(`lane${index + 1}-count`).textContent = 
+                                `${lane.vehicle_count} vehicles`;
+                        });
+                    }
+                });
+        }
+
+        // Start updating stats when page loads if system is running
+        window.onload = function() {
+            updateStats();
+        };
+    </script>
+</body>
+</html>
