@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Settings as SettingsIcon, 
   Save, 
@@ -14,7 +14,7 @@ import {
   X
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
-import { settingsAPI } from '';
+import { settingsAPI } from '../lib/api';
 
 // Types
 interface SignalTiming {

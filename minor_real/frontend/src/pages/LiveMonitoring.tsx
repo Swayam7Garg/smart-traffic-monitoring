@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Video, Activity, Clock, AlertTriangle, Download, CheckCircle, XCircle, Loader, Wifi, WifiOff } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
@@ -72,7 +72,6 @@ export const LiveMonitoring: React.FC = () => {
       ws.current = new WebSocket('ws://localhost:8000/ws/live-feed');
       
       ws.current.onopen = () => {
-        console.log('WebSocket connected');
         setWsConnected(true);
       };
       
@@ -94,7 +93,6 @@ export const LiveMonitoring: React.FC = () => {
       };
       
       ws.current.onclose = () => {
-        console.log('WebSocket disconnected');
         setWsConnected(false);
         // Reconnect after 5 seconds
         setTimeout(connectWebSocket, 5000);

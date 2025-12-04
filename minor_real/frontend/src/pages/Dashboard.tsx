@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Car, Bike, Truck, Activity, AlertTriangle, TrendingUp, TrendingDown, Video, VideoOff, Camera, Clock, ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Alert } from '../components/ui/Alert';
-import { analyticsAPI } from '';
+import { analyticsAPI } from '../lib/api';
 
 interface VehicleCount {
   car: number;
@@ -96,7 +96,7 @@ export const DashboardPage: React.FC = () => {
       wsRef.current = ws;
 
       ws.onopen = () => {
-        console.log('✓ Multi-camera WebSocket connected');
+        // WebSocket connected
       };
 
       ws.onmessage = (event) => {

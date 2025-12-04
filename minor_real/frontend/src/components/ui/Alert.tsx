@@ -1,6 +1,6 @@
-import React from 'react';
+
 import { AlertCircle, CheckCircle, Info, XCircle } from 'lucide-react';
-import { cn } from '.ts';
+import { cn } from '../../lib/utils';
 
 interface AlertProps {
   type?: 'info' | 'success' | 'warning' | 'error';

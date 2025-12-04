@@ -1,6 +1,6 @@
-import React from 'react';
+
 import { LayoutDashboard, Film, TrendingUp, Settings, AlertTriangle, Video, Activity } from 'lucide-react';
-import { cn } from '.ts';
+import { cn } from '../../lib/utils';
 
 interface SidebarProps {
   activePage: string;

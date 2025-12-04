@@ -7,7 +7,7 @@ import {
 import TrafficFlowChart from '../components/charts/TrafficFlowChart';
 import VehicleDistributionChart from '../components/charts/VehicleDistributionChart';
 import PeakHoursChart from '../components/charts/PeakHoursChart';
-import { analyticsAPI } from '';
+import { analyticsAPI } from '../lib/api';
 
 interface Location {
   location_id: string;
