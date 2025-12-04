@@ -9,6 +9,7 @@ services:
     rootDir: minor_real/backend
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    pythonVersion: "3.11.11"
     healthCheckPath: /
     envVars:
       - key: APP_NAME
