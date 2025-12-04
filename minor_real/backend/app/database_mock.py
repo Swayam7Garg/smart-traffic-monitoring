@@ -200,6 +200,13 @@ class MockDatabase:
             logger.debug(f"MockDB: Created collection '{collection_name}'")
         return self.collections[collection_name]
     
+    def __getattr__(self, collection_name: str) -> MockCollection:
+        """Get or create collection via attribute access (e.g., db.my_collection)"""
+        if collection_name.startswith('_'):
+            # Avoid infinite recursion for private attributes
+            raise AttributeError(f"'{type(self).__name__}' object has no attribute '{collection_name}'")
+        return self[collection_name]
+    
     def get_collection(self, collection_name: str) -> MockCollection:
         """Get or create collection (alternative method)"""
         return self[collection_name]
