@@ -1,0 +1,43 @@
+services:
+  # Backend API Service
+  - type: web
+    name: traffic-management-backend
+    runtime: python
+    region: singapore
+    plan: free
+    branch: master
+    rootDir: minor_real/backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /
+    envVars:
+      - key: APP_NAME
+        value: Traffic Management System
+      - key: DEBUG
+        value: false
+      - key: MONGODB_URL
+        sync: false
+      - key: YOLO_MODEL_PATH
+        value: ./data/models/yolov8n.pt
+      - key: YOLO_CONFIDENCE
+        value: 0.15
+      - key: VIDEO_INPUT_PATH
+        value: ./data/videos
+      - key: VIDEO_OUTPUT_PATH
+        value: ./data/outputs
+      - key: MIN_GREEN_TIME
+        value: 15
+      - key: MAX_GREEN_TIME
+        value: 120
+      - key: DEFAULT_GREEN_TIME
+        value: 30
+      - key: CONGESTION_THRESHOLD
+        value: 20
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_ORIGINS
+        value: https://your-frontend-url.vercel.app,http://localhost:5173
+
+# MongoDB Atlas (recommended for production)
+# Sign up at https://www.mongodb.com/cloud/atlas
+# Add connection string to MONGODB_URL environment variable in Render dashboard

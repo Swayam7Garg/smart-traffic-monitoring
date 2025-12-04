@@ -45,9 +45,18 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "your-secret-key-change-in-production"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     
+    # CORS (Comma-separated list of allowed origins)
+    ALLOWED_ORIGINS: str = "http://localhost:5173,http://localhost:5174,http://localhost:3000"
+    
     class Config:
         env_file = ".env"
         case_sensitive = True
+    
+    def get_allowed_origins(self) -> list[str]:
+        """Parse ALLOWED_ORIGINS string into list"""
+        if self.ALLOWED_ORIGINS == "*":
+            return ["*"]
+        return [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",")]
 
 
 @lru_cache()
