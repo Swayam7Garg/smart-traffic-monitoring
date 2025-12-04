@@ -7,7 +7,7 @@ import {
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
-import { emergencyAPI, trafficAPI } from '../lib/api.ts';
+import { emergencyAPI, trafficAPI } from '';
 
 interface EmergencyOverride {
   id: string;

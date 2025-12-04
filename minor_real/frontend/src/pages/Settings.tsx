@@ -14,7 +14,7 @@ import {
   X
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
-import { settingsAPI } from '../lib/api.ts';
+import { settingsAPI } from '';
 
 // Types
 interface SignalTiming {
