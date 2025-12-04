@@ -15,8 +15,10 @@ services:
         value: Traffic Management System
       - key: DEBUG
         value: false
+      - key: USE_MOCK_DB
+        value: true
       - key: MONGODB_URL
-        sync: false
+        value: mongodb://localhost:27017
       - key: YOLO_MODEL_PATH
         value: ./data/models/yolov8n.pt
       - key: YOLO_CONFIDENCE

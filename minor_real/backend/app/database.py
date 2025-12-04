@@ -1,10 +1,12 @@
 """
 MongoDB database connection and operations
+Falls back to in-memory mock database if MongoDB is not available
 """
 
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from pymongo.errors import ConnectionFailure
 from .config import get_settings
+from .database_mock import get_mock_database
 import logging
 
 logger = logging.getLogger(__name__)
@@ -13,16 +15,26 @@ settings = get_settings()
 
 
 class Database:
-    """MongoDB database manager"""
+    """MongoDB database manager with mock fallback"""
     
     client: AsyncIOMotorClient = None
     db: AsyncIOMotorDatabase = None
+    use_mock: bool = False
     
     @classmethod
     async def connect_db(cls):
-        """Connect to MongoDB database"""
+        """Connect to MongoDB database or use mock"""
+        
+        # Check if mock mode is explicitly enabled
+        if settings.USE_MOCK_DB:
+            logger.info("Mock database mode enabled (USE_MOCK_DB=True)")
+            cls.use_mock = True
+            cls.db = await get_mock_database(settings.MONGODB_DB_NAME)
+            logger.info(f"✓ Mock Database initialized: {settings.MONGODB_DB_NAME}")
+            return
+        
         try:
-            # Add timeout settings
+            # Try to connect to real MongoDB
             cls.client = AsyncIOMotorClient(
                 settings.MONGODB_URL,
                 serverSelectionTimeoutMS=5000,
@@ -32,12 +44,14 @@ class Database:
             # Test connection with timeout
             await cls.client.admin.command('ping')
             cls.db = cls.client[settings.MONGODB_DB_NAME]
+            cls.use_mock = False
             logger.info(f"✓ Connected to MongoDB: {settings.MONGODB_DB_NAME}")
         except Exception as e:
             logger.warning(f"MongoDB connection failed: {e}")
-            logger.warning("Running in limited mode without database")
-            # Don't raise - allow app to start without DB
-            cls.db = None
+            logger.warning("Falling back to in-memory mock database")
+            cls.use_mock = True
+            cls.db = await get_mock_database(settings.MONGODB_DB_NAME)
+            logger.info(f"✓ Mock Database initialized: {settings.MONGODB_DB_NAME}")
     
     @classmethod
     async def close_db(cls):

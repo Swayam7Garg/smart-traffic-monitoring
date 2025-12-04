@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     # MongoDB
     MONGODB_URL: str = "mongodb://localhost:27017"
     MONGODB_DB_NAME: str = "traffic_management"
+    USE_MOCK_DB: bool = False  # Set to True to use in-memory database (no MongoDB required)
     
     # YOLO Model
     YOLO_MODEL_PATH: str = "../data/models/yolov8n.pt"
