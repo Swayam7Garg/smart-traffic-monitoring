@@ -51,3 +51,9 @@ flask-cors>=4.0.0
 fpdf2>=2.7.0  # PDF reports
 openpyxl>=3.1.0  # Excel reports
 xlsxwriter>=3.1.0  # Excel formatting
+
+# SMS Alerts (Optional - uncomment if using SMS notifications)
+# twilio>=8.10.0
+
+# User Authentication
+werkzeug>=3.0.0  # For password hashing (included with Flask)
