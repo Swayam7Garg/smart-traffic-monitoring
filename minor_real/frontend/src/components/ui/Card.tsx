@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '../../lib/utils';
+import { cn } from '../../lib/utils.ts';
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
@@ -66,3 +66,4 @@ interface CardContentProps {
 export const CardContent: React.FC<CardContentProps> = ({ children, className }) => {
   return <div className={cn('text-slate-300', className)}>{children}</div>;
 };
+

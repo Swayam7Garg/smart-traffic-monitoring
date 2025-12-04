@@ -1,6 +1,6 @@
 import React from 'react';
 import { LayoutDashboard, Film, TrendingUp, Settings, AlertTriangle, Video, Activity } from 'lucide-react';
-import { cn } from '../../lib/utils';
+import { cn } from '.ts';
 
 interface SidebarProps {
   activePage: string;
@@ -70,3 +70,4 @@ export const Sidebar: React.FC<SidebarProps> = ({ activePage, onPageChange }) =>
     </div>
   );
 };
+

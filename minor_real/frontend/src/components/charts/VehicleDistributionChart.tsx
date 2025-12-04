@@ -90,3 +90,4 @@ export default function VehicleDistributionChart({ data }: VehicleDistributionCh
     </div>
   );
 }
+

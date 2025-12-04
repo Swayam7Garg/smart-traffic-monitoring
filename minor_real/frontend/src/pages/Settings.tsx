@@ -14,7 +14,7 @@ import {
   X
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
-import { settingsAPI } from '../lib/api';
+import { settingsAPI } from '.ts';
 
 // Types
 interface SignalTiming {
@@ -969,3 +969,4 @@ const Settings: React.FC = () => {
 };
 
 export default Settings;
+

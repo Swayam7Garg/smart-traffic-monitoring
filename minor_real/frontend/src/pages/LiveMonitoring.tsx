@@ -3,7 +3,7 @@ import { Video, Activity, Clock, AlertTriangle, Download, CheckCircle, XCircle, 
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { VideoUpload } from '../components/VideoUpload';
-import { trafficAPI } from '../lib/api';
+import { trafficAPI } from '.ts';
 
 interface ProcessedVideo {
   id: string;
@@ -469,3 +469,4 @@ export const LiveMonitoring: React.FC = () => {
     </div>
   );
 };
+

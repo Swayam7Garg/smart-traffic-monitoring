@@ -93,3 +93,4 @@ export default function TrafficFlowChart({ data }: TrafficFlowChartProps) {
     </div>
   );
 }
+

@@ -3,7 +3,7 @@ import { Car, Bike, Truck, Activity, AlertTriangle, TrendingUp, TrendingDown, Vi
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Alert } from '../components/ui/Alert';
-import { analyticsAPI } from '../lib/api';
+import { analyticsAPI } from '../lib/api.ts';
 
 interface VehicleCount {
   car: number;
@@ -430,3 +430,4 @@ export const DashboardPage: React.FC = () => {
     </div>
   );
 };
+

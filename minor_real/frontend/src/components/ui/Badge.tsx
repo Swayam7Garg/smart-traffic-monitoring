@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '../../lib/utils';
+import { cn } from '.ts';
 
 interface BadgeProps {
   children: React.ReactNode;
@@ -35,3 +35,4 @@ export const Badge: React.FC<BadgeProps> = ({
     </span>
   );
 };
+
