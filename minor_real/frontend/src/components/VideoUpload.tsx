@@ -3,7 +3,7 @@ import { Upload, Video, X, CheckCircle, AlertCircle, Loader } from 'lucide-react
 import { Card, CardHeader, CardTitle, CardContent } from './ui/Card';
 import { Button } from './ui/Button';
 import { Badge } from './ui/Badge';
-import { trafficAPI } from '.ts';
+import { trafficAPI } from '../lib/api.ts';
 
 interface UploadStatus {
   file: File | null;
