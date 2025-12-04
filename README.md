@@ -18,33 +18,27 @@ An AI-powered real-time traffic management system using **YOLOv8** deep learning
 ## 🏗️ Architecture
 
 ```
-minor_real/
-├── backend/          # FastAPI backend server
-│   ├── app/
-│   │   ├── ml/       # Machine learning modules
-│   │   ├── models/   # Pydantic data models
-│   │   ├── routers/  # API endpoints
-│   │   └── main.py   # Application entry point
-│   └── requirements.txt
-├── frontend/         # React.js dashboard
-├── data/
-│   ├── videos/       # Input traffic videos
-│   ├── models/       # YOLO model weights
-│   └── outputs/      # Processed results
-└── docs/             # Documentation
-
+smart-traffic-monitoring/
+├── README.md                   # This file
+├── .gitignore                  # Git ignore rules
+└── minor_real/                 # Main project directory
+    ├── backend/                # FastAPI backend server
+    │   ├── app/
+    │   │   ├── ml/            # Machine learning modules
+    │   │   ├── models/        # Pydantic data models
+    │   │   ├── routers/       # API endpoints
+    │   │   └── main.py        # Application entry point
+    │   ├── requirements.txt
+    │   └── .env.example       # Environment config template
+    ├── frontend/               # React.js dashboard
+    │   ├── src/               # Source code
+    │   ├── package.json       # Node dependencies
+    │   └── vite.config.ts     # Vite configuration
+    └── data/
+        ├── videos/            # Input traffic videos
+        ├── models/            # YOLO model weights
+        └── outputs/           # Processed results
 ```
-
-## 📸 Screenshots
-
-### Live 4-Way Intersection Monitor
-![Dashboard](docs/screenshots/dashboard.png)
-
-### Traffic Analytics & Charts
-![Analytics](docs/screenshots/analytics.png)
-
-### Video Analysis Results
-![Video Processing](docs/screenshots/video-analysis.png)
 
 ---
 
@@ -93,7 +87,7 @@ minor_real/
 
 1. **Navigate to backend directory:**
    ```bash
-   cd backend
+   cd minor_real/backend
    ```
 
 2. **Create and activate virtual environment:**
@@ -115,7 +109,7 @@ minor_real/
 4. **Configure environment:**
    ```bash
    copy .env.example .env
-   # Edit .env with your configuration
+   # Edit .env with your MongoDB connection and other settings
    ```
 
 5. **Start MongoDB:**
@@ -124,26 +118,19 @@ minor_real/
    # or update MONGODB_URL in .env
    ```
 
-6. **Download YOLO model:**
+6. **Run the backend:**
    ```bash
-   # YOLOv8 will auto-download on first run
-   # or place yolov8n.pt in data/models/
+   uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
    ```
 
-7. **Run the backend:**
-   ```bash
-   python -m app.main
-   # or
-   uvicorn app.main:app --reload
-   ```
-
-Backend will run on `http://localhost:8000`
+Backend will run on `http://localhost:8000`  
+API Documentation: `http://localhost:8000/docs`
 
 ### Frontend Setup
 
 1. **Navigate to frontend directory:**
    ```bash
-   cd frontend
+   cd minor_real/frontend
    ```
 
 2. **Install dependencies:**
@@ -226,11 +213,11 @@ print(timings)  # {'north_south': 65, 'east_west': 30}
 
 ```bash
 # Backend tests
-cd backend
+cd minor_real/backend
 pytest
 
 # Frontend tests
-cd frontend
+cd minor_real/frontend
 npm test
 ```
 
@@ -276,7 +263,7 @@ npm test
 
 ## 🔧 Configuration
 
-Create a `.env` file in the `backend/` directory with these settings:
+Create a `.env` file in the `minor_real/backend/` directory with these settings:
 
 ```env
 # Application
@@ -343,77 +330,99 @@ CONGESTION_THRESHOLD=20
 ## 🗂️ Project Structure Explained
 
 ```
-minor_real/
-├── backend/                    # Python FastAPI Backend
-│   ├── app/
-│   │   ├── main.py            # ⚡ App entry point, WebSocket, startup/shutdown
-│   │   ├── config.py          # ⚙️ Configuration management (env vars)
-│   │   ├── database.py        # 💾 MongoDB connection & collections
-│   │   │
-│   │   ├── models/            # 📋 Pydantic data models
-│   │   │   ├── traffic.py     # Traffic data schemas
-│   │   │   ├── cameras.py     # Camera config models
-│   │   │   ├── signals.py     # Signal control models
-│   │   │   └── violations.py  # Violation models
-│   │   │
-│   │   ├── routers/           # 🔌 API Endpoints
-│   │   │   ├── traffic.py     # /api/v1/traffic/* endpoints
-│   │   │   ├── cameras.py     # /api/v1/cameras/* endpoints
-│   │   │   ├── analytics.py   # /api/v1/analytics/* endpoints
-│   │   │   ├── signals.py     # /api/v1/signals/* endpoints
-│   │   │   └── violations.py  # /api/v1/violations/* endpoints
-│   │   │
-│   │   └── ml/                # 🧠 Machine Learning Modules
-│   │       ├── detector.py    # YOLOv8 vehicle detection
-│   │       ├── traffic_analyzer.py      # Traffic density calculation
-│   │       ├── signal_controller.py     # Adaptive signal algorithm
-│   │       ├── emergency_priority.py    # Emergency vehicle system
-│   │       ├── video_processor.py       # Video frame processing
-│   │       └── detection_storage.py     # Detection caching
-│   │
-│   ├── requirements.txt       # Python dependencies
-│   ├── venv/                  # Virtual environment
-│   └── .env                   # Environment variables
+smart-traffic-monitoring/
+├── README.md                           # 📖 Main documentation
+├── .gitignore                          # Git ignore rules
 │
-├── frontend/                   # ⚛️ React TypeScript Frontend
-│   ├── src/
-│   │   ├── main.tsx           # App entry point
-│   │   ├── App.tsx            # Main app component with routing
-│   │   ├── index.css          # Global styles + Tailwind
-│   │   │
-│   │   ├── pages/             # 📄 Page Components
-│   │   │   ├── Dashboard.tsx          # 📺 4-way live monitor
-│   │   │   ├── LiveMonitoring.tsx     # 🎬 Video upload & analysis
-│   │   │   ├── Analytics.tsx          # 📊 Charts & reports
-│   │   │   ├── CameraManagement.tsx   # 🎥 Camera CRUD
-│   │   │   ├── Emergency.tsx          # 🚨 Emergency events
-│   │   │   └── Settings.tsx           # ⚙️ System settings
-│   │   │
-│   │   ├── components/        # 🧩 Reusable Components
-│   │   │   ├── layout/        # Header, Sidebar
-│   │   │   ├── charts/        # Chart components (Recharts)
-│   │   │   ├── ui/            # Button, Input, Label primitives
-│   │   │   └── VideoUpload.tsx
-│   │   │
-│   │   └── lib/
-│   │       └── api.ts         # Axios API client config
-│   │
-│   ├── package.json           # Node dependencies
-│   ├── vite.config.ts         # Vite build config
-│   ├── tailwind.config.js     # Tailwind CSS config
-│   └── tsconfig.json          # TypeScript config
-│
-├── data/                       # 💾 Data Storage
-│   ├── models/
-│   │   └── yolov8n.pt         # Pre-trained YOLO weights (6 MB)
-│   ├── videos/                # Input traffic videos
-│   └── outputs/               # Processed videos & reports
-│
-└── docs/                       # 📚 Documentation
-    ├── PROJECT_ARCHITECTURE_GUIDE.md  # Complete architecture guide
-    ├── PRESENTATION_README.md         # Presentation documentation
-    ├── PLANTUML_DIAGRAMS.md          # System diagrams
-    └── screenshots/                   # Project screenshots
+└── minor_real/                         # 🚀 Main Project Directory
+    │
+    ├── backend/                        # 🐍 Python FastAPI Backend
+    │   ├── app/
+    │   │   ├── __init__.py
+    │   │   ├── main.py                # ⚡ App entry point, WebSocket, startup/shutdown
+    │   │   ├── config.py              # ⚙️ Configuration management (env vars)
+    │   │   ├── database.py            # 💾 MongoDB connection & collections
+    │   │   │
+    │   │   ├── models/                # 📋 Pydantic Data Models
+    │   │   │   ├── __init__.py
+    │   │   │   ├── traffic.py         # Traffic data schemas
+    │   │   │   ├── cameras.py         # Camera config models
+    │   │   │   ├── signals.py         # Signal control models
+    │   │   │   ├── settings.py        # System settings models
+    │   │   │   └── violations.py      # Violation models
+    │   │   │
+    │   │   ├── routers/               # 🔌 API Endpoints
+    │   │   │   ├── __init__.py
+    │   │   │   ├── traffic.py         # /api/v1/traffic/* endpoints
+    │   │   │   ├── cameras.py         # /api/v1/cameras/* endpoints
+    │   │   │   ├── analytics.py       # /api/v1/analytics/* endpoints
+    │   │   │   ├── signals.py         # /api/v1/signals/* endpoints
+    │   │   │   ├── settings.py        # /api/v1/settings/* endpoints
+    │   │   │   └── violations.py      # /api/v1/violations/* endpoints
+    │   │   │
+    │   │   └── ml/                    # 🧠 Machine Learning Modules
+    │   │       ├── __init__.py
+    │   │       ├── detector.py        # YOLOv8 vehicle detection
+    │   │       ├── traffic_analyzer.py      # Traffic density calculation
+    │   │       ├── signal_controller.py     # Adaptive signal algorithm
+    │   │       ├── emergency_priority.py    # Emergency vehicle system
+    │   │       ├── video_processor.py       # Video frame processing
+    │   │       └── detection_storage.py     # Detection caching
+    │   │
+    │   ├── .env.example               # Environment config template
+    │   ├── requirements.txt           # Python dependencies
+    │   └── venv/                      # Virtual environment (not in git)
+    │
+    ├── frontend/                       # ⚛️ React TypeScript Frontend
+    │   ├── src/
+    │   │   ├── main.tsx               # App entry point
+    │   │   ├── App.tsx                # Main app component with routing
+    │   │   ├── App.css                # App styles
+    │   │   ├── index.css              # Global styles + Tailwind
+    │   │   │
+    │   │   ├── pages/                 # 📄 Page Components
+    │   │   │   ├── Dashboard.tsx              # 📺 4-way live monitor
+    │   │   │   ├── LiveMonitoring.tsx         # 🎬 Video upload & analysis
+    │   │   │   ├── Analytics.tsx              # 📊 Charts & reports
+    │   │   │   ├── CameraManagement.tsx       # 🎥 Camera CRUD
+    │   │   │   ├── Emergency.tsx              # 🚨 Emergency events
+    │   │   │   └── Settings.tsx               # ⚙️ System settings
+    │   │   │
+    │   │   ├── components/            # 🧩 Reusable Components
+    │   │   │   ├── layout/            # Header, Sidebar navigation
+    │   │   │   ├── charts/            # Chart components (Recharts)
+    │   │   │   │   ├── PeakHoursChart.tsx
+    │   │   │   │   ├── TrafficFlowChart.tsx
+    │   │   │   │   └── VehicleDistributionChart.tsx
+    │   │   │   ├── ui/                # UI primitives (Button, Card, Alert, Badge)
+    │   │   │   └── VideoUpload.tsx
+    │   │   │
+    │   │   ├── lib/
+    │   │   │   └── api.ts             # Axios API client config
+    │   │   │
+    │   │   └── assets/                # Static assets (images, icons)
+    │   │
+    │   ├── public/                    # Public static files
+    │   ├── .gitignore                 # Frontend gitignore
+    │   ├── package.json               # Node dependencies
+    │   ├── package-lock.json          # Locked dependencies
+    │   ├── vite.config.ts             # Vite build configuration
+    │   ├── tailwind.config.js         # Tailwind CSS config
+    │   ├── postcss.config.js          # PostCSS config
+    │   ├── eslint.config.js           # ESLint configuration
+    │   ├── tsconfig.json              # TypeScript config (main)
+    │   ├── tsconfig.app.json          # TypeScript config (app)
+    │   ├── tsconfig.node.json         # TypeScript config (node)
+    │   ├── index.html                 # HTML entry point
+    │   └── node_modules/              # Node dependencies (not in git)
+    │
+    ├── data/                           # 💾 Data Storage (not in git)
+    │   ├── models/
+    │   │   └── yolov8n.pt             # Pre-trained YOLO weights (auto-download)
+    │   ├── videos/                    # Input traffic videos
+    │   └── outputs/                   # Processed videos & reports
+    │
+    └── .gitignore                      # Minor_real specific gitignore
 ```
 
 ---
@@ -424,7 +433,7 @@ minor_real/
 
 #### Backend
 ```bash
-cd backend
+cd minor_real/backend
 python -m venv venv
 .\venv\Scripts\activate          # Windows
 source venv/bin/activate         # Linux/Mac
@@ -434,7 +443,7 @@ python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 #### Frontend
 ```bash
-cd frontend
+cd minor_real/frontend
 npm install
 npm run dev
 ```
