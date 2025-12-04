@@ -427,7 +427,33 @@ smart-traffic-monitoring/
 
 ---
 
-## 🚀 Quick Start Guide
+## 🚀 Deployment
+
+### Quick Deploy (No Database Required) ⚡
+
+Deploy for **testing/demo without MongoDB** in under 10 minutes:
+
+See **[DEPLOY_QUICK.md](DEPLOY_QUICK.md)** for step-by-step guide.
+
+**What you get:**
+- ✅ Full backend API on Render (free)
+- ✅ Frontend on Vercel (free)
+- ✅ In-memory database (no MongoDB setup needed)
+- ✅ All features working (data resets on restart)
+
+**Perfect for:** Demos, testing, project presentations
+
+### Production Deploy (With MongoDB)
+
+For persistent data storage, see **[DEPLOYMENT.md](DEPLOYMENT.md)** for full guide including:
+- MongoDB Atlas setup
+- Environment configuration
+- Custom domains
+- Monitoring & scaling
+
+---
+
+## 🚀 Quick Start Guide (Local Development)
 
 ### Method 1: Using Virtual Environment (Recommended)
 
