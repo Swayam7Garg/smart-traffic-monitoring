@@ -46,12 +46,17 @@ class VehicleDetector:
             detect_emergency: Enable emergency vehicle detection
         """
         try:
+            import torch
             self.model = YOLO(model_path)
+            self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+            if self.device == 'cuda':
+                self.model.to('cuda')
             self.confidence = confidence
             self.detect_emergency = detect_emergency
             self.emergency_vehicles_detected = []
             logger.info(f"✓ YOLOv8 model loaded: {model_path}")
-            logger.info(f"✓ Confidence threshold: {confidence} (optimized for motorcycles)")
+            logger.info(f"✓ Running on: {self.device.upper()} {'- ' + torch.cuda.get_device_name(0) if self.device == 'cuda' else ''}")
+            logger.info(f"✓ Confidence threshold: {confidence} (optimized for side vehicles)")
             logger.info(f"Emergency vehicle detection: {'enabled' if detect_emergency else 'disabled'}")
         except Exception as e:
             logger.error(f"Failed to load YOLO model: {e}")
@@ -73,9 +78,10 @@ class VehicleDetector:
                 - bbox: Bounding box [x, y, w, h]
                 - is_emergency: Boolean indicating emergency vehicle
         """
-        # OPTIMIZED: Use imgsz=640 for 4x faster detection (still accurate for traffic)
+        # BALANCED: imgsz=1024 for good accuracy at reasonable speed (sweet spot)
         # Lower IOU threshold for better detection of overlapping vehicles (especially bikes)
-        results = self.model(frame, conf=self.confidence, iou=0.4, imgsz=640, verbose=False)
+        # Increased max_det for crowded scenes
+        results = self.model(frame, conf=self.confidence, iou=0.4, imgsz=1024, max_det=150, device=self.device, verbose=False)
         
         detections = []
         for result in results:
@@ -89,14 +95,28 @@ class VehicleDetector:
                     confidence = float(box.conf[0])
                     vehicle_type = self.VEHICLE_CLASSES[class_id]
                     
-                    # Attempt to classify auto-rickshaws (3-wheelers)
-                    # They often get detected as motorcycles but are larger
-                    if detect_three_wheelers and class_id == 3:  # motorcycle
-                        bbox_area = (x2 - x1) * (y2 - y1)
-                        # Auto-rickshaws are significantly larger than bikes/scooters
-                        # Typical sizes: Bike/Scooter: 3000-12000px, Auto: 20000-40000px
-                        if bbox_area > 25000:  # Increased threshold to avoid false positives
-                            vehicle_type = "auto-rickshaw"
+                    # Calculate bbox dimensions
+                    bbox_width = x2 - x1
+                    bbox_height = y2 - y1
+                    bbox_area = bbox_width * bbox_height
+                    aspect_ratio = bbox_width / bbox_height if bbox_height > 0 else 0
+                    
+                    # Classify two-wheelers and three-wheelers (improved logic)
+                    if class_id == 1:  # bicycle
+                        logger.info(f"✓ BICYCLE detected: area={bbox_area:.0f}px, conf={confidence:.2f}")
+                    
+                    elif class_id == 3:  # motorcycle class
+                        # Keep as motorcycle - no auto-rickshaw conversion
+                        vehicle_type = "motorcycle"
+                        logger.info(f"✓ MOTORCYCLE detected: area={bbox_area:.0f}px, ratio={aspect_ratio:.2f}, conf={confidence:.2f}")
+                    
+                    # Keep cars as cars - no auto-rickshaw conversion
+                    elif class_id == 2:  # car class
+                        # All cars remain as cars
+                        pass
+                    
+                    # Log all detections for debugging (only in debug mode)
+                    logger.debug(f"Detected: {vehicle_type} (class {class_id}, conf={confidence:.2f}, area={bbox_area:.0f}, ratio={aspect_ratio:.2f})")
                     
                     # Check for emergency vehicles (basic color/shape heuristics)
                     is_emergency = False
@@ -279,8 +299,8 @@ class VehicleDetector:
                 detection_reasons.append("Fire truck combo")
             
             # === DECISION THRESHOLD ===
-            # Require confidence score >= 50 to classify as emergency vehicle
-            if confidence_score >= 50:
+            # Require confidence score >= 70 to classify as emergency vehicle (strict to avoid false positives)
+            if confidence_score >= 70:
                 reasons_str = " + ".join(detection_reasons)
                 logger.info(f"🚨 EMERGENCY VEHICLE DETECTED: {vehicle_type} | Score: {confidence_score} | {reasons_str}")
                 return True
@@ -305,19 +325,21 @@ class VehicleDetector:
         Returns:
             Tuple of (detections, annotated_frame)
         """
-        # Use imgsz=640 for faster detection
+        # BALANCED: imgsz=1024 for good accuracy at reasonable speed (sweet spot)
         if track:
             results = self.model.track(
                 frame,
                 conf=self.confidence,
-                iou=0.4,
-                imgsz=640,
+                iou=0.45,
+                imgsz=1024,
                 persist=True,
                 tracker="bytetrack.yaml",
-                verbose=False
+                device=self.device,
+                verbose=False,
+                max_det=150  # Increased for better side vehicle detection
             )
         else:
-            results = self.model(frame, conf=self.confidence, iou=0.4, imgsz=640, verbose=False)
+            results = self.model(frame, conf=self.confidence, iou=0.45, imgsz=1024, max_det=150, device=self.device, verbose=False)
         
         detections = []
         annotated_frame = frame.copy()
@@ -344,28 +366,19 @@ class VehicleDetector:
                     # Classify two-wheelers and three-wheelers
                     if class_id == 1:  # bicycle
                         vehicle_type = "bicycle"
-                        logger.info(f"✓ Bicycle detected: area={bbox_area:.0f}px")
+                        logger.debug(f"✓ Bicycle detected: area={bbox_area:.0f}px")
                     
                     elif class_id == 3:  # motorcycle class
-                        # Auto-rickshaws: larger area (6000+) and square aspect ratio (1.0-1.8)
-                        # Motorcycles/bikes: smaller area (<6000) or narrow/tall aspect
-                        if bbox_area > 6000 and 1.0 <= aspect_ratio <= 1.8:
-                            vehicle_type = "auto-rickshaw"
-                            logger.info(f"✓ Auto-rickshaw detected: area={bbox_area:.0f}px, ratio={aspect_ratio:.2f}")
-                        else:
-                            vehicle_type = "motorcycle"
-                            logger.info(f"✓ Motorcycle detected: area={bbox_area:.0f}px, ratio={aspect_ratio:.2f}")
+                        # Keep as motorcycle - no auto-rickshaw conversion
+                        vehicle_type = "motorcycle"
+                        logger.debug(f"✓ Motorcycle detected: area={bbox_area:.0f}px, ratio={aspect_ratio:.2f}")
                     
-                    # Check small cars - might be auto-rickshaws detected as cars
+                    # Keep cars as cars - no auto-rickshaw conversion
                     elif class_id == 2:  # car class
-                        # Small square vehicles could be autos (3000-12000 pixels)
-                        # Auto-rickshaws have distinctive square/compact shape
-                        if 3000 <= bbox_area <= 12000 and 0.9 <= aspect_ratio <= 1.7:
-                            vehicle_type = "auto-rickshaw"
-                            logger.info(f"✓ Auto (from car): area={bbox_area:.0f}px, ratio={aspect_ratio:.2f}")
-                        # Log all vehicle detections to see what's being found
+                        # All cars remain as cars
+                        pass
                     
-                    logger.info(f"Detected: {vehicle_type} (class {class_id}, conf={confidence:.2f}, area={bbox_area:.0f}, ratio={aspect_ratio:.2f})")
+                    logger.debug(f"Detected: {vehicle_type} (class {class_id}, conf={confidence:.2f}, area={bbox_area:.0f}, ratio={aspect_ratio:.2f})")
                     
                     # Check emergency status
                     is_emergency = False

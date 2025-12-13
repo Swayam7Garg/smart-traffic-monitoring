@@ -123,9 +123,9 @@ export const LiveMonitoring: React.FC = () => {
 
   const getCongestionBadge = (level: number) => {
     const congestion = getCongestionLevel(level);
-    if (level >= 75) return <Badge variant="danger">{congestion.label}</Badge>;
-    if (level >= 50) return <Badge variant="warning">{congestion.label}</Badge>;
-    if (level >= 25) return <Badge variant="warning">{congestion.label}</Badge>;
+    if (level >= 85) return <Badge variant="danger">{congestion.label}</Badge>;
+    if (level >= 70) return <Badge variant="warning">{congestion.label}</Badge>;
+    if (level >= 40) return <Badge variant="warning">{congestion.label}</Badge>;
     return <Badge variant="success">{congestion.label}</Badge>;
   };
 
@@ -335,7 +335,9 @@ export const LiveMonitoring: React.FC = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <h4 className="font-medium text-slate-200 truncate">
-                            {video.location_id || 'Unknown Location'}
+                            {video.location_id 
+                              ? video.location_id.replace('junction_0', 'Junction ').replace('junction_', 'Junction ')
+                              : 'Unknown Location'}
                           </h4>
                           {getStatusBadge(video.status)}
                         </div>
@@ -425,9 +427,9 @@ export const LiveMonitoring: React.FC = () => {
                     <div className="flex-1 bg-slate-800/30 rounded-full h-2 overflow-hidden">
                       <div
                         className={`h-full transition-all ${
-                          video.congestion_level >= 75 ? 'bg-red-500' :
-                          video.congestion_level >= 50 ? 'bg-orange-500' :
-                          video.congestion_level >= 25 ? 'bg-yellow-500' :
+                          video.congestion_level >= 85 ? 'bg-red-500' :
+                          video.congestion_level >= 70 ? 'bg-orange-500' :
+                          video.congestion_level >= 40 ? 'bg-yellow-500' :
                           'bg-green-500'
                         }`}
                         style={{ width: `${Math.min(video.congestion_level, 100)}%` }}

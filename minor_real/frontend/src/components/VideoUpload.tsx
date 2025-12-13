@@ -14,6 +14,7 @@ interface UploadStatus {
 }
 
 export const VideoUpload: React.FC = () => {
+  const [selectedJunction, setSelectedJunction] = useState<string>('junction_01');
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>({
     file: null,
     progress: 0,
@@ -22,6 +23,14 @@ export const VideoUpload: React.FC = () => {
   });
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const junctions = [
+    { id: 'junction_01', name: 'Junction 1' },
+    { id: 'junction_02', name: 'Junction 2' },
+    { id: 'junction_03', name: 'Junction 3' },
+    { id: 'junction_04', name: 'Junction 4' },
+    { id: 'junction_05', name: 'Junction 5' },
+  ];
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -101,7 +110,7 @@ export const VideoUpload: React.FC = () => {
         });
       }, 200);
 
-      const response = await trafficAPI.uploadVideo(formData, 'junction_01');
+      const response = await trafficAPI.uploadVideo(formData, selectedJunction);
       clearInterval(progressInterval);
 
       setUploadStatus(prev => ({
@@ -225,6 +234,29 @@ export const VideoUpload: React.FC = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
+          {/* Junction Selector */}
+          <div className="space-y-2">
+            <label htmlFor="junction-select" className="block text-sm font-medium text-slate-300">
+              Select Junction/Location
+            </label>
+            <select
+              id="junction-select"
+              value={selectedJunction}
+              onChange={(e) => setSelectedJunction(e.target.value)}
+              disabled={uploadStatus.status !== 'idle'}
+              className="w-full px-4 py-2 bg-slate-800 border border-slate-600 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {junctions.map((junction) => (
+                <option key={junction.id} value={junction.id}>
+                  {junction.name}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-slate-400">
+              Video will be processed and stored under {junctions.find(j => j.id === selectedJunction)?.name}
+            </p>
+          </div>
+
           {/* Drop Zone */}
           <div
             onDragOver={handleDragOver}

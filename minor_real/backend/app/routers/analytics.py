@@ -18,43 +18,65 @@ async def get_dashboard_stats(
     hours: int = Query(24, ge=1, le=168, description="Time range in hours")
 ):
     """Get dashboard statistics"""
-    traffic_col = await get_traffic_collection()
-    violations_col = await get_violations_collection()
-    
-    start_time = datetime.utcnow() - timedelta(hours=hours)
-    
-    # Get traffic statistics
-    traffic_pipeline = [
-        {"$match": {"timestamp": {"$gte": start_time}}},
-        {
-            "$group": {
-                "_id": None,
-                "total_vehicles": {"$sum": "$vehicle_count"},
-                "avg_congestion": {"$avg": "$congestion_level"},
-                "locations": {"$addToSet": "$location_id"}
+    try:
+        traffic_col = await get_traffic_collection()
+        violations_col = await get_violations_collection()
+        
+        if not traffic_col or not violations_col:
+            # Return empty stats if collections don't exist
+            return {
+                "time_range_hours": hours,
+                "total_vehicles": 0,
+                "average_congestion": 0,
+                "total_violations": 0,
+                "monitored_locations": 0,
+                "timestamp": datetime.utcnow()
             }
+        
+        start_time = datetime.utcnow() - timedelta(hours=hours)
+        
+        # Get traffic statistics
+        traffic_pipeline = [
+            {"$match": {"timestamp": {"$gte": start_time}}},
+            {
+                "$group": {
+                    "_id": None,
+                    "total_vehicles": {"$sum": "$vehicle_count"},
+                    "avg_congestion": {"$avg": "$congestion_level"},
+                    "locations": {"$addToSet": "$location_id"}
+                }
+            }
+        ]
+        
+        traffic_cursor = traffic_col.aggregate(traffic_pipeline)
+        traffic_stats = await traffic_cursor.to_list(length=1)
+        
+        # Get violations count
+        violations_count = await violations_col.count_documents({
+            "timestamp": {"$gte": start_time}
+        })
+        
+        # Combine statistics
+        stats = traffic_stats[0] if traffic_stats else {}
+        
+        return {
+            "time_range_hours": hours,
+            "total_vehicles": stats.get("total_vehicles", 0),
+            "average_congestion": round(stats.get("avg_congestion", 0), 2),
+            "total_violations": violations_count,
+            "monitored_locations": len(stats.get("locations", [])),
+            "timestamp": datetime.utcnow()
         }
-    ]
-    
-    traffic_cursor = traffic_col.aggregate(traffic_pipeline)
-    traffic_stats = await traffic_cursor.to_list(length=1)
-    
-    # Get violations count
-    violations_count = await violations_col.count_documents({
-        "timestamp": {"$gte": start_time}
-    })
-    
-    # Combine statistics
-    stats = traffic_stats[0] if traffic_stats else {}
-    
-    return {
-        "time_range_hours": hours,
-        "total_vehicles": stats.get("total_vehicles", 0),
-        "average_congestion": round(stats.get("avg_congestion", 0), 2),
-        "total_violations": violations_count,
-        "monitored_locations": len(stats.get("locations", [])),
-        "timestamp": datetime.utcnow()
-    }
+    except Exception as e:
+        # Return empty stats on any error
+        return {
+            "time_range_hours": hours,
+            "total_vehicles": 0,
+            "average_congestion": 0,
+            "total_violations": 0,
+            "monitored_locations": 0,
+            "timestamp": datetime.utcnow()
+        }
 
 
 @router.get("/trends/{location_id}")

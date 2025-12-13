@@ -23,7 +23,7 @@ class TrafficAnalyzer:
         """
         self.history_size = history_size
         self.vehicle_history = deque(maxlen=history_size)
-        self.congestion_threshold = 20  # vehicles
+        self.congestion_threshold = 35  # vehicles (increased for more realistic assessment)
     
     def analyze_frame(self, detections: List[Dict]) -> Dict:
         """
@@ -50,12 +50,12 @@ class TrafficAnalyzer:
         # Calculate traffic density
         avg_vehicles = np.mean(self.vehicle_history) if self.vehicle_history else 0
         
-        # Determine traffic state
-        if congestion_level < 30:
+        # Determine traffic state (adjusted thresholds for realistic assessment)
+        if congestion_level < 40:
             traffic_state = "light"
-        elif congestion_level < 60:
+        elif congestion_level < 70:
             traffic_state = "moderate"
-        elif congestion_level < 80:
+        elif congestion_level < 85:
             traffic_state = "heavy"
         else:
             traffic_state = "congested"
@@ -66,7 +66,7 @@ class TrafficAnalyzer:
             "congestion_level": round(congestion_level, 2),
             "avg_vehicle_count": round(avg_vehicles, 2),
             "traffic_state": traffic_state,
-            "is_congested": congestion_level >= 80
+            "is_congested": congestion_level >= 85
         }
     
     def calculate_flow_rate(self, time_interval: float = 60.0) -> float:

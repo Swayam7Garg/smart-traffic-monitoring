@@ -220,11 +220,11 @@ async def get_detection_config():
     if not config:
         default_config = {
             "_id": "default",
-            "confidence_threshold": 0.2,
+            "confidence_threshold": 0.18,
             "iou_threshold": 0.4,
-            "emergency_color_threshold": 50,
+            "emergency_color_threshold": 70,
             "autorickshaw_size_threshold": 25000,
-            "frame_skip": 2,
+            "frame_skip": 7,
             "updated_at": datetime.now()
         }
         await db.detection_config.insert_one(default_config)
@@ -255,11 +255,11 @@ async def reset_detection_config():
     db = Database.get_database()
     default_config = {
         "_id": "default",
-        "confidence_threshold": 0.25,
-        "iou_threshold": 0.45,
-        "emergency_color_threshold": 50,
+        "confidence_threshold": 0.18,
+        "iou_threshold": 0.4,
+        "emergency_color_threshold": 70,
         "autorickshaw_size_threshold": 25000,
-        "frame_skip": 2,
+        "frame_skip": 7,
         "updated_at": datetime.now()
     }
     

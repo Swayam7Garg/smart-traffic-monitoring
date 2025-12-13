@@ -188,7 +188,7 @@ export default function Analytics() {
         message: `${emergencyCount} emergency vehicle(s) detected. Prioritize green signals.`
       };
     }
-    if (congestion > 70) {
+    if (congestion > 85) {
       return {
         icon: AlertCircle,
         color: 'text-orange-400',
@@ -196,7 +196,7 @@ export default function Analytics() {
         message: 'Consider extending signal timing or activating alternative routes.'
       };
     }
-    if (congestion < 30) {
+    if (congestion < 40) {
       return {
         icon: CheckCircle,
         color: 'text-green-400',
@@ -319,11 +319,14 @@ export default function Analytics() {
                 onChange={(e) => setSelectedLocation(e.target.value)}
                 className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                {locations.map((loc) => (
-                  <option key={loc.location_id} value={loc.location_id} className="bg-gray-900">
-                    {loc.location_id} ({loc.total_videos} videos)
-                  </option>
-                ))}
+                {locations.map((loc) => {
+                  const junctionName = loc.location_id.replace('junction_0', 'Junction ').replace('junction_', 'Junction ');
+                  return (
+                    <option key={loc.location_id} value={loc.location_id} className="bg-gray-900">
+                      {junctionName} ({loc.total_videos} videos, {loc.total_vehicles} vehicles)
+                    </option>
+                  );
+                })}
               </select>
             </>
           )}
@@ -371,7 +374,9 @@ export default function Analytics() {
               </div>
               <div className="text-right">
                 <div className="text-sm text-gray-400">Location</div>
-                <div className="text-lg font-semibold text-white">{lastVideo.location_id}</div>
+                <div className="text-lg font-semibold text-white">
+                  {lastVideo.location_id.replace('junction_0', 'Junction ').replace('junction_', 'Junction ')}
+                </div>
                 <div className="text-xs text-gray-500 mt-1">
                   {new Date(lastVideo.processed_at).toLocaleString()}
                 </div>
@@ -555,7 +560,9 @@ export default function Analytics() {
                       <tbody>
                         {data.location_stats.map((location, index) => (
                           <tr key={index} className="border-b border-white/5 hover:bg-white/5 transition">
-                            <td className="py-3 px-4 text-white font-medium">{location.location_id}</td>
+                            <td className="py-3 px-4 text-white font-medium">
+                              {location.location_id.replace('junction_0', 'Junction ').replace('junction_', 'Junction ')}
+                            </td>
                             <td className="text-right py-3 px-4 text-white">{location.total_vehicles.toLocaleString()}</td>
                             <td className="text-right py-3 px-4 text-gray-300">{location.videos}</td>
                             <td className="text-right py-3 px-4 text-gray-300">

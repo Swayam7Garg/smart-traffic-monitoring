@@ -315,7 +315,7 @@ export default function Emergency() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <h4 className="font-medium text-white truncate">
-                            {override.location_id}
+                            {override.location_id.replace('junction_0', 'Junction ').replace('junction_', 'Junction ')}
                           </h4>
                           {getStatusBadge(override.status)}
                           {getPriorityBadge(override.priority_level)}
@@ -404,9 +404,9 @@ export default function Emergency() {
           className="px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="all" className="bg-gray-900">All Locations</option>
-          <option value="junction_01" className="bg-gray-900">Junction 01</option>
-          <option value="junction_02" className="bg-gray-900">Junction 02</option>
-          <option value="junction_03" className="bg-gray-900">Junction 03</option>
+          <option value="junction_01" className="bg-gray-900">Junction 1</option>
+          <option value="junction_02" className="bg-gray-900">Junction 2</option>
+          <option value="junction_03" className="bg-gray-900">Junction 3</option>
         </select>
       </div>
 
@@ -445,7 +445,7 @@ export default function Emergency() {
                         {new Date(detection.timestamp).toLocaleString()}
                       </td>
                       <td className="py-3 px-4 text-sm text-white font-medium">
-                        {detection.location_id}
+                        {detection.location_id.replace('junction_0', 'Junction ').replace('junction_', 'Junction ')}
                       </td>
                       <td className="py-3 px-4 text-sm">
                         <span className="px-2 py-1 bg-red-500/20 text-red-400 rounded text-xs">

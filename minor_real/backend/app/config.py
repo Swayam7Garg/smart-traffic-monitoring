@@ -26,12 +26,12 @@ class Settings(BaseSettings):
     
     # YOLO Model
     YOLO_MODEL_PATH: str = "../data/models/yolov8n.pt"
-    YOLO_CONFIDENCE: float = 0.15  # Lowered to 0.15 for better bike/scooter/auto detection
+    YOLO_CONFIDENCE: float = 0.18  # Lowered for better side vehicle detection with GPU acceleration
     
     # Video Processing
     VIDEO_INPUT_PATH: str = "../data/videos"
     VIDEO_OUTPUT_PATH: str = "../data/outputs"
-    FRAME_SKIP: int = 2  # Process every Nth frame
+    FRAME_SKIP: int = 7  # SWEET SPOT: Process every 7th frame (balanced speed + accuracy)
     
     # Traffic Signal Simulation
     MIN_GREEN_TIME: int = 15  # seconds
@@ -39,7 +39,7 @@ class Settings(BaseSettings):
     DEFAULT_GREEN_TIME: int = 30  # seconds
     
     # Alerts
-    CONGESTION_THRESHOLD: int = 20  # vehicles
+    CONGESTION_THRESHOLD: int = 35  # vehicles (realistic threshold for congestion assessment)
     VIOLATION_THRESHOLD: int = 5  # violations per minute
     
     # Security
@@ -47,7 +47,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     
     # CORS (Comma-separated list of allowed origins)
-    ALLOWED_ORIGINS: str = "http://localhost:5173,http://localhost:5174,http://localhost:3000"
+    ALLOWED_ORIGINS: str = "http://localhost:5173,http://localhost:5174,http://localhost:5175,http://localhost:3000"
     
     class Config:
         env_file = ".env"

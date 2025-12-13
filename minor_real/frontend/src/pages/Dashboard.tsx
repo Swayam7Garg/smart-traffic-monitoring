@@ -373,8 +373,8 @@ export const DashboardPage: React.FC = () => {
                   <div>
                     <p className="text-gray-400 text-xs">Congestion</p>
                     <p className={`font-bold text-lg ${
-                      camera.congestion_level > 70 ? 'text-red-500' : 
-                      camera.congestion_level > 40 ? 'text-yellow-500' : 'text-green-500'
+                      camera.congestion_level > 85 ? 'text-red-500' : 
+                      camera.congestion_level > 55 ? 'text-yellow-500' : 'text-green-500'
                     }`}>
                       {camera.congestion_level}%
                     </p>

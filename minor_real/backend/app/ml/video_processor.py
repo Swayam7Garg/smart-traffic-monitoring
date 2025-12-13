@@ -15,6 +15,7 @@ import logging
 from .detector import VehicleDetector
 from .traffic_analyzer import TrafficAnalyzer
 from .detection_storage import store_detection_batch, store_video_processing_job
+from ..config import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +44,11 @@ class VideoProcessor:
         self.output_path.mkdir(parents=True, exist_ok=True)
         logger.info(f"Video output directory: {self.output_path}")
         
+        # Get frame_skip from config
+        settings = get_settings()
+        self.frame_skip = settings.FRAME_SKIP
+        logger.info(f"Video processor frame skip: {self.frame_skip}")
+        
         # Thread pool for async processing
         self.executor = ThreadPoolExecutor(max_workers=2)
         
@@ -57,23 +63,27 @@ class VideoProcessor:
         video_path: str,
         location_id: str = "unknown",
         save_annotated: bool = True,
-        frame_skip: int = 10,
+        frame_skip: Optional[int] = None,
         emergency_callback: Optional[Callable] = None
     ) -> Dict:
         """
-        Process a video file and detect vehicles (OPTIMIZED: 3x faster)
+        Process a video file and detect vehicles (OPTIMIZED with better accuracy)
         
         Args:
             video_path: Path to input video file
             location_id: Location identifier
             save_annotated: Save video with annotations
-            frame_skip: Process every Nth frame (default 10 for faster processing)
+            frame_skip: Process every Nth frame (uses config default if None)
             emergency_callback: Optional callback for immediate emergency alerts
             
         Returns:
             Processing results summary
         """
-        logger.info(f"Processing video: {video_path}")
+        # Use configured frame_skip if not provided
+        if frame_skip is None:
+            frame_skip = self.frame_skip
+        
+        logger.info(f"Processing video: {video_path} (frame_skip={frame_skip})")
         
         # Open video
         cap = cv2.VideoCapture(video_path)
@@ -267,59 +277,47 @@ class VideoProcessor:
     
     def _count_unique_vehicles_by_type(self, all_detections: List, tracked_ids: set) -> Dict[str, int]:
         """
-        Count unique vehicles by type using both tracking IDs and estimation
-        For vehicles without tracking IDs, estimate based on detection frequency
+        Count unique vehicles by type using ONLY tracking IDs (no estimation)
+        Each unique track_id represents ONE vehicle, counted only once
         """
-        # Count by vehicle type using tracking IDs where available
+        # Count unique tracking IDs per vehicle type
         tracked_vehicles_by_type = {}
-        untracked_detections_by_type = {}
+        emergency_track_ids = set()  # Track unique emergency vehicle IDs
         
         for det in all_detections:
             vehicle_type = det.get('class_name', 'unknown')
             track_id = det.get('track_id')
+            is_emergency = det.get('is_emergency', False)
             
+            # Only count if we have a valid tracking ID
             if track_id is not None:
-                # Has tracking ID - count unique IDs per type
+                # Initialize set for this vehicle type if needed
                 if vehicle_type not in tracked_vehicles_by_type:
                     tracked_vehicles_by_type[vehicle_type] = set()
+                
+                # Add tracking ID (set automatically handles duplicates)
                 tracked_vehicles_by_type[vehicle_type].add(track_id)
-            else:
-                # No tracking ID - count raw detections for estimation
-                untracked_detections_by_type[vehicle_type] = untracked_detections_by_type.get(vehicle_type, 0) + 1
+                
+                # Track unique emergency vehicles
+                if is_emergency:
+                    emergency_track_ids.add(track_id)
         
-        # Build final counts
+        # Build final counts - each unique track_id = 1 vehicle
         vehicle_counts = {}
         total = 0
         
-        for vehicle_type in set(list(tracked_vehicles_by_type.keys()) + list(untracked_detections_by_type.keys())):
-            tracked_count = len(tracked_vehicles_by_type.get(vehicle_type, set()))
-            untracked_count = untracked_detections_by_type.get(vehicle_type, 0)
-            
-            if tracked_count > 0:
-                # Has some tracked vehicles - use tracked count
-                final_count = tracked_count
-                
-                # Add estimated unique vehicles from untracked detections
-                # Assume avg 20 detections per vehicle (conservative estimate)
-                if untracked_count > 0:
-                    estimated_additional = max(1, untracked_count // 20)
-                    final_count += estimated_additional
-                    logger.info(f"{vehicle_type}: {tracked_count} tracked + ~{estimated_additional} estimated = {final_count}")
-            else:
-                # No tracked vehicles - estimate from detection frequency
-                # Conservative: assume 15-30 detections per vehicle depending on type
-                if vehicle_type in ['motorcycle', 'bicycle']:
-                    avg_detections_per_vehicle = 15  # Bikes appear less
-                else:
-                    avg_detections_per_vehicle = 25  # Larger vehicles appear more
-                
-                final_count = max(1, untracked_count // avg_detections_per_vehicle)
-                logger.info(f"{vehicle_type}: {untracked_count} detections → estimated {final_count} unique vehicles")
-            
-            vehicle_counts[vehicle_type] = final_count
-            total += final_count
+        for vehicle_type, track_id_set in tracked_vehicles_by_type.items():
+            count = len(track_id_set)  # Count of unique track IDs
+            vehicle_counts[vehicle_type] = count
+            total += count
+            logger.info(f"✓ {vehicle_type}: {count} unique vehicles (tracked)")
         
         vehicle_counts['total'] = total
+        vehicle_counts['emergency_vehicles'] = len(emergency_track_ids)
+        
+        if emergency_track_ids:
+            logger.warning(f"🚨 Emergency vehicles: {len(emergency_track_ids)} unique (IDs: {emergency_track_ids})")
+        logger.info(f"📊 Total unique vehicles: {total} (tracked with ByteTrack)")
         return vehicle_counts
     
     async def process_video_async(
@@ -425,6 +423,7 @@ class LiveStreamProcessor:
         self.detector = detector
         self.analyzer = analyzer
         self.active_streams = {}
+        self.frame_skip = 7  # SWEET SPOT: Frame skip for live stream processing
     
     async def process_stream(
         self,
@@ -466,7 +465,7 @@ class LiveStreamProcessor:
         failed_reads = 0
         max_failed_reads = 30  # Stop after 30 consecutive failures
         frame_count = 0
-        frame_skip = 2  # Process every 3rd frame for speed
+        frame_skip = self.frame_skip  # Use configured frame skip value
         
         try:
             while stream_id in self.active_streams:
